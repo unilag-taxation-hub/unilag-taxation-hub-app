@@ -1,36 +1,80 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import {
+  collection,
+  getDocs,
+  orderBy,
+  query,
+} from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import Link from "next/link";
 
-const questions = [
-  {
-    question: "What is taxation?",
-    answer:
-      "Taxation is a compulsory levy imposed by government on individuals and businesses to raise revenue and achieve economic or social objectives.",
-  },
-  {
-    question: "State one major purpose of taxation.",
-    answer:
-      "One major purpose of taxation is to raise revenue for government expenditure.",
-  },
-];
+interface GermanQuestion {
+  id: string;
+  question: string;
+  correctAnswer: string;
+  explanation?: string;
+  order: number;
+}
 
 export default function GermanQuestionsPage() {
-  const params = useParams();
-  const courseId = params.courseId as string;
+  const params = useParams<{ courseId: string }>();
+  const courseId = params.courseId;
 
+  const [questions, setQuestions] = useState<GermanQuestion[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [studentAnswer, setStudentAnswer] = useState("");
   const [showAnswer, setShowAnswer] = useState(false);
   const [finished, setFinished] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const current = questions[currentQuestion];
+  useEffect(() => {
+    async function loadQuestions() {
+      try {
+        const questionsReference = collection(
+          db,
+          "courses",
+          courseId,
+          "germanQuestions"
+        );
+
+        const questionsQuery = query(
+          questionsReference,
+          orderBy("order", "asc")
+        );
+
+        const snapshot = await getDocs(questionsQuery);
+
+        const questionData: GermanQuestion[] = snapshot.docs.map(
+          (questionDocument) => ({
+            id: questionDocument.id,
+            ...(questionDocument.data() as Omit<
+              GermanQuestion,
+              "id"
+            >),
+          })
+        );
+
+        setQuestions(questionData);
+      } catch (caughtError) {
+        console.error(caughtError);
+        setError("Unable to load German questions.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (courseId) {
+      loadQuestions();
+    }
+  }, [courseId]);
 
   function handleNext() {
     if (!studentAnswer.trim()) {
-      alert("Please enter your answer.");
+      alert("Please type your answer.");
       return;
     }
 
@@ -49,6 +93,54 @@ export default function GermanQuestionsPage() {
     setShowAnswer(false);
   }
 
+  if (loading) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-gray-100">
+        <p>Loading questions...</p>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
+        <div className="bg-white p-8 rounded-2xl shadow text-center">
+          <p className="text-red-600">{error}</p>
+
+          <Link
+            href={`/courses/${courseId}`}
+            className="inline-block mt-5 text-green-700 font-semibold"
+          >
+            ← Back to Course
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
+  if (questions.length === 0) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
+        <div className="bg-white p-8 rounded-2xl shadow text-center">
+          <h1 className="text-2xl font-bold">
+            No German questions available
+          </h1>
+
+          <p className="mt-2 text-gray-600">
+            Questions have not been added to this course yet.
+          </p>
+
+          <Link
+            href={`/courses/${courseId}`}
+            className="inline-block mt-5 text-green-700 font-semibold"
+          >
+            ← Back to Course
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
   if (finished) {
     return (
       <main className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
@@ -58,7 +150,7 @@ export default function GermanQuestionsPage() {
           </h1>
 
           <p className="mt-4 text-gray-600">
-            You have completed all short-answer questions.
+            You have completed all questions.
           </p>
 
           <Link
@@ -72,47 +164,66 @@ export default function GermanQuestionsPage() {
     );
   }
 
+  const current = questions[currentQuestion];
+
   return (
     <main className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-8">
-        <p className="text-sm text-gray-500">
-          Question {currentQuestion + 1} of {questions.length}
-        </p>
-
-        <h1 className="text-2xl font-bold mt-4">
-          {current.question}
-        </h1>
-
-        <textarea
-          value={studentAnswer}
-          onChange={(event) => setStudentAnswer(event.target.value)}
-          placeholder="Type your answer here..."
-          rows={6}
-          className="w-full mt-6 border rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-green-600"
-        />
-
-        {showAnswer && (
-          <div className="mt-5 bg-green-50 border border-green-200 rounded-xl p-4">
-            <h2 className="font-bold text-green-700">
-              Model Answer
-            </h2>
-
-            <p className="mt-2 text-gray-700">
-              {current.answer}
-            </p>
-          </div>
-        )}
-
-        <button
-          onClick={handleNext}
-          className="w-full mt-6 bg-yellow-500 text-white py-3 rounded-xl font-semibold"
+      <div className="max-w-2xl mx-auto">
+        <Link
+          href={`/courses/${courseId}`}
+          className="inline-block mb-5 text-green-700 font-semibold"
         >
-          {!showAnswer
-            ? "Check Answer"
-            : currentQuestion === questions.length - 1
-            ? "Finish"
-            : "Next Question"}
-        </button>
+          ← Back to Course
+        </Link>
+
+        <div className="bg-white rounded-2xl shadow-lg p-8">
+          <p className="text-sm text-gray-500">
+            Question {currentQuestion + 1} of {questions.length}
+          </p>
+
+          <h1 className="text-2xl font-bold mt-4">
+            {current.question}
+          </h1>
+
+          <textarea
+            value={studentAnswer}
+            onChange={(event) =>
+              setStudentAnswer(event.target.value)
+            }
+            placeholder="Type your answer here..."
+            rows={6}
+            className="w-full mt-6 border rounded-xl p-4"
+          />
+
+          {showAnswer && (
+            <div className="mt-5 bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+              <h2 className="font-bold text-yellow-700">
+                Model Answer
+              </h2>
+
+              <p className="mt-2 text-gray-700">
+                {current.correctAnswer}
+              </p>
+
+              {current.explanation && (
+                <p className="mt-3 text-sm text-gray-600">
+                  {current.explanation}
+                </p>
+              )}
+            </div>
+          )}
+
+          <button
+            onClick={handleNext}
+            className="w-full mt-6 bg-yellow-500 text-white py-3 rounded-xl font-semibold"
+          >
+            {!showAnswer
+              ? "Check Answer"
+              : currentQuestion === questions.length - 1
+              ? "Finish"
+              : "Next Question"}
+          </button>
+        </div>
       </div>
     </main>
   );
