@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function HomePage() {
   return (
@@ -6,11 +7,17 @@ export default function HomePage() {
       <div className="w-full max-w-2xl text-center text-white">
 
         <div className="mb-8">
-          <div className="w-20 h-20 mx-auto bg-white text-green-700 rounded-2xl flex items-center justify-center text-4xl shadow-xl">
-            🎓
-          </div>
-        </div>
-
+  <div className="w-28 h-28 mx-auto bg-white rounded-2xl overflow-hidden shadow-xl">
+    <Image
+      src="/logo.png"
+      alt="UNILAG Taxation Hub Logo"
+      width={112}
+      height={112}
+      className="w-full h-full object-cover"
+      priority
+    />
+  </div>
+</div>
         <h1 className="text-4xl md:text-6xl font-bold">
           UNILAG Taxation Hub
         </h1>
