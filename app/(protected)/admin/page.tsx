@@ -128,6 +128,18 @@ export default function AdminPage() {
               Add model answers and answer guides.
             </p>
           </Link>
+          <Link
+  href="/admin/content"
+  className="block bg-white rounded-2xl shadow p-6 hover:shadow-lg transition md:col-span-2"
+>
+  <h2 className="text-xl font-bold">
+    🛠️ Manage Existing Content
+  </h2>
+
+  <p className="mt-2 text-gray-600">
+    View, edit and delete published notes and questions.
+  </p>
+</Link>
         </div>
 
         <Link
