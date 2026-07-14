@@ -10,6 +10,8 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
+const ADMIN_EMAIL = "problematitzbest@gmail.com";
+
 interface Course {
   id: string;
   title: string;
@@ -47,7 +49,9 @@ export default function AddMCQPage() {
         );
 
         courseData.sort((a, b) =>
-          `${a.code} ${a.title}`.localeCompare(`${b.code} ${b.title}`)
+          `${a.code} ${a.title}`.localeCompare(
+            `${b.code} ${b.title}`
+          )
         );
 
         setCourses(courseData);
@@ -67,16 +71,18 @@ export default function AddMCQPage() {
     loadCourses();
   }, []);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
+
     setMessage("");
     setSuccess(false);
 
     const user = auth.currentUser;
-    const adminEmail =
-      process.env.NEXT_PUBLIC_ADMIN_EMAIL?.trim().toLowerCase();
+    const userEmail = user?.email?.trim().toLowerCase();
 
-    if (!user || user.email?.trim().toLowerCase() !== adminEmail) {
+    if (!user || userEmail !== ADMIN_EMAIL) {
       setMessage("You are not authorized to add MCQs.");
       return;
     }
@@ -96,7 +102,9 @@ export default function AddMCQPage() {
     const orderNumber = Number(order);
 
     if (!Number.isInteger(orderNumber) || orderNumber < 1) {
-      setMessage("Order must be a whole number starting from 1.");
+      setMessage(
+        "Question order must be a whole number starting from 1."
+      );
       return;
     }
 
@@ -107,14 +115,15 @@ export default function AddMCQPage() {
       optionD.trim(),
     ];
 
-    const answerIndex: Record<string, number> = {
+    const answerPositions: Record<string, number> = {
       A: 0,
       B: 1,
       C: 2,
       D: 3,
     };
 
-    const selectedCorrectAnswer = options[answerIndex[correctAnswer]];
+    const selectedCorrectAnswer =
+      options[answerPositions[correctAnswer]];
 
     try {
       setSaving(true);
@@ -168,8 +177,7 @@ export default function AddMCQPage() {
           </h1>
 
           <p className="mt-2 text-gray-600">
-            Select a course and add a multiple-choice question directly to
-            Firestore.
+            Select a course and add a multiple-choice question.
           </p>
 
           <form onSubmit={handleSubmit} className="mt-7 space-y-5">
@@ -179,7 +187,9 @@ export default function AddMCQPage() {
               </label>
 
               {loadingCourses ? (
-                <p className="text-gray-500">Loading courses...</p>
+                <p className="text-gray-500">
+                  Loading courses...
+                </p>
               ) : courses.length === 0 ? (
                 <p className="text-red-600">
                   No courses found. Add a course first.
@@ -208,7 +218,9 @@ export default function AddMCQPage() {
 
               <textarea
                 value={question}
-                onChange={(event) => setQuestion(event.target.value)}
+                onChange={(event) =>
+                  setQuestion(event.target.value)
+                }
                 placeholder="Enter the MCQ here..."
                 rows={4}
                 className="w-full border rounded-xl p-3"
@@ -223,8 +235,11 @@ export default function AddMCQPage() {
                 </label>
 
                 <input
+                  type="text"
                   value={optionA}
-                  onChange={(event) => setOptionA(event.target.value)}
+                  onChange={(event) =>
+                    setOptionA(event.target.value)
+                  }
                   className="w-full border rounded-xl p-3"
                   required
                 />
@@ -236,8 +251,11 @@ export default function AddMCQPage() {
                 </label>
 
                 <input
+                  type="text"
                   value={optionB}
-                  onChange={(event) => setOptionB(event.target.value)}
+                  onChange={(event) =>
+                    setOptionB(event.target.value)
+                  }
                   className="w-full border rounded-xl p-3"
                   required
                 />
@@ -249,8 +267,11 @@ export default function AddMCQPage() {
                 </label>
 
                 <input
+                  type="text"
                   value={optionC}
-                  onChange={(event) => setOptionC(event.target.value)}
+                  onChange={(event) =>
+                    setOptionC(event.target.value)
+                  }
                   className="w-full border rounded-xl p-3"
                   required
                 />
@@ -262,8 +283,11 @@ export default function AddMCQPage() {
                 </label>
 
                 <input
+                  type="text"
                   value={optionD}
-                  onChange={(event) => setOptionD(event.target.value)}
+                  onChange={(event) =>
+                    setOptionD(event.target.value)
+                  }
                   className="w-full border rounded-xl p-3"
                   required
                 />
@@ -299,7 +323,7 @@ export default function AddMCQPage() {
                 onChange={(event) =>
                   setExplanation(event.target.value)
                 }
-                placeholder="Explain why the answer is correct."
+                placeholder="Explain why the selected answer is correct."
                 rows={4}
                 className="w-full border rounded-xl p-3"
               />
@@ -315,7 +339,9 @@ export default function AddMCQPage() {
                 min="1"
                 step="1"
                 value={order}
-                onChange={(event) => setOrder(event.target.value)}
+                onChange={(event) =>
+                  setOrder(event.target.value)
+                }
                 className="w-full border rounded-xl p-3"
                 required
               />

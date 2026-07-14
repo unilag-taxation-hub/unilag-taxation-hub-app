@@ -10,6 +10,8 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
+const ADMIN_EMAIL = "problematitzbest@gmail.com";
+
 interface Course {
   id: string;
   title: string;
@@ -43,7 +45,9 @@ export default function AddNotesPage() {
         );
 
         courseData.sort((a, b) =>
-          `${a.code} ${a.title}`.localeCompare(`${b.code} ${b.title}`)
+          `${a.code} ${a.title}`.localeCompare(
+            `${b.code} ${b.title}`
+          )
         );
 
         setCourses(courseData);
@@ -63,17 +67,18 @@ export default function AddNotesPage() {
     loadCourses();
   }, []);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
+
     setMessage("");
     setSuccess(false);
 
     const user = auth.currentUser;
+    const userEmail = user?.email?.trim().toLowerCase();
 
-    const adminEmail =
-      process.env.NEXT_PUBLIC_ADMIN_EMAIL?.trim().toLowerCase();
-
-    if (!user || user.email?.trim().toLowerCase() !== adminEmail) {
+    if (!user || userEmail !== ADMIN_EMAIL) {
       setMessage("You are not authorized to publish notes.");
       return;
     }
@@ -91,7 +96,9 @@ export default function AddNotesPage() {
     const orderNumber = Number(order);
 
     if (!Number.isInteger(orderNumber) || orderNumber < 1) {
-      setMessage("Order must be a whole number starting from 1.");
+      setMessage(
+        "Topic order must be a whole number starting from 1."
+      );
       return;
     }
 
@@ -153,7 +160,9 @@ export default function AddNotesPage() {
               </label>
 
               {loadingCourses ? (
-                <p className="text-gray-500">Loading courses...</p>
+                <p className="text-gray-500">
+                  Loading courses...
+                </p>
               ) : courses.length === 0 ? (
                 <p className="text-red-600">
                   No courses found. Add a course first.
@@ -214,7 +223,9 @@ export default function AddNotesPage() {
 
               <textarea
                 value={content}
-                onChange={(event) => setContent(event.target.value)}
+                onChange={(event) =>
+                  setContent(event.target.value)
+                }
                 placeholder="Write or paste the complete study note here..."
                 rows={16}
                 className="w-full border rounded-xl p-3"
@@ -238,8 +249,8 @@ export default function AddNotesPage() {
               />
 
               <p className="mt-1 text-sm text-gray-500">
-                Use 1 for the first topic, 2 for the second topic, and so
-                on.
+                Use 1 for the first topic, 2 for the second topic,
+                and so on.
               </p>
             </div>
 

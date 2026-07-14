@@ -5,25 +5,17 @@ import { onAuthStateChanged } from "firebase/auth";
 import Link from "next/link";
 import { auth } from "@/lib/firebase";
 
+const ADMIN_EMAIL = "problematitzbest@gmail.com";
+
 export default function AdminPage() {
   const [checking, setChecking] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const adminEmail =
-      process.env.NEXT_PUBLIC_ADMIN_EMAIL?.trim().toLowerCase();
-
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       const userEmail = user?.email?.trim().toLowerCase();
 
-      setIsAdmin(
-        Boolean(
-          userEmail &&
-            adminEmail &&
-            userEmail === adminEmail
-        )
-      );
-
+      setIsAdmin(userEmail === ADMIN_EMAIL);
       setChecking(false);
     });
 
@@ -33,9 +25,13 @@ export default function AdminPage() {
   if (checking) {
     return (
       <main className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <p className="text-gray-600">
-          Checking admin access...
-        </p>
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-green-700 border-t-transparent rounded-full animate-spin mx-auto" />
+
+          <p className="mt-4 text-gray-600">
+            Checking admin access...
+          </p>
+        </div>
       </main>
     );
   }
@@ -49,8 +45,7 @@ export default function AdminPage() {
           </h1>
 
           <p className="mt-3 text-gray-600">
-            This page is available only to the platform
-            administrator.
+            This page is available only to the platform administrator.
           </p>
 
           <Link

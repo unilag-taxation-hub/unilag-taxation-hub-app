@@ -10,6 +10,8 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
+const ADMIN_EMAIL = "problematitzbest@gmail.com";
+
 interface Course {
   id: string;
   title: string;
@@ -70,7 +72,7 @@ export default function AddQuestionsPage() {
     loadCourses();
   }, []);
 
-  function clearForm() {
+  function clearQuestionFields() {
     setQuestion("");
     setModelAnswer("");
     setExplanation("");
@@ -87,13 +89,9 @@ export default function AddQuestionsPage() {
     setSuccess(false);
 
     const user = auth.currentUser;
-    const adminEmail =
-      process.env.NEXT_PUBLIC_ADMIN_EMAIL?.trim().toLowerCase();
+    const userEmail = user?.email?.trim().toLowerCase();
 
-    if (
-      !user ||
-      user.email?.trim().toLowerCase() !== adminEmail
-    ) {
+    if (!user || userEmail !== ADMIN_EMAIL) {
       setMessage("You are not authorized to add questions.");
       return;
     }
@@ -164,7 +162,7 @@ export default function AddQuestionsPage() {
         setMessage("Theory question added successfully.");
       }
 
-      clearForm();
+      clearQuestionFields();
       setSuccess(true);
     } catch (error) {
       console.error(error);
@@ -191,8 +189,7 @@ export default function AddQuestionsPage() {
           </h1>
 
           <p className="mt-2 text-gray-600">
-            Select the question type and publish it directly to
-            a course.
+            Select the question type and publish it directly to a course.
           </p>
 
           <div className="grid grid-cols-2 gap-3 mt-7">
@@ -200,7 +197,7 @@ export default function AddQuestionsPage() {
               type="button"
               onClick={() => {
                 setQuestionType("german");
-                clearForm();
+                clearQuestionFields();
                 setMessage("");
               }}
               className={`p-3 rounded-xl font-semibold ${
@@ -216,7 +213,7 @@ export default function AddQuestionsPage() {
               type="button"
               onClick={() => {
                 setQuestionType("theory");
-                clearForm();
+                clearQuestionFields();
                 setMessage("");
               }}
               className={`p-3 rounded-xl font-semibold ${
@@ -356,9 +353,7 @@ export default function AddQuestionsPage() {
             {message && (
               <p
                 className={`text-center font-medium ${
-                  success
-                    ? "text-green-700"
-                    : "text-red-600"
+                  success ? "text-green-700" : "text-red-600"
                 }`}
               >
                 {message}

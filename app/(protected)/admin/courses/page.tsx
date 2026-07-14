@@ -10,6 +10,8 @@ import {
 } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
+const ADMIN_EMAIL = "problematitzbest@gmail.com";
+
 interface Course {
   id: string;
   title: string;
@@ -29,20 +31,28 @@ export default function ManageCoursesPage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [success, setSuccess] = useState(false);
 
   async function loadCourses() {
     try {
       const snapshot = await getDocs(collection(db, "courses"));
 
-      const courseData: Course[] = snapshot.docs.map((courseDocument) => ({
-        id: courseDocument.id,
-        ...(courseDocument.data() as Omit<Course, "id">),
-      }));
+      const courseData: Course[] = snapshot.docs.map(
+        (courseDocument) => ({
+          id: courseDocument.id,
+          ...(courseDocument.data() as Omit<Course, "id">),
+        })
+      );
+
+      courseData.sort((a, b) =>
+        `${a.code} ${a.title}`.localeCompare(`${b.code} ${b.title}`)
+      );
 
       setCourses(courseData);
     } catch (error) {
       console.error(error);
       setMessage("Unable to load courses.");
+      setSuccess(false);
     }
   }
 
@@ -52,14 +62,14 @@ export default function ManageCoursesPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     setMessage("");
+    setSuccess(false);
 
     const user = auth.currentUser;
+    const userEmail = user?.email?.trim().toLowerCase();
 
-    const adminEmail =
-      process.env.NEXT_PUBLIC_ADMIN_EMAIL?.trim().toLowerCase();
-
-    if (!user || user.email?.trim().toLowerCase() !== adminEmail) {
+    if (!user || userEmail !== ADMIN_EMAIL) {
       setMessage("You are not authorized to add courses.");
       return;
     }
@@ -87,11 +97,13 @@ export default function ManageCoursesPage() {
       setDescription("");
 
       setMessage("Course added successfully.");
+      setSuccess(true);
 
       await loadCourses();
     } catch (error) {
       console.error(error);
       setMessage("Failed to add course.");
+      setSuccess(false);
     } finally {
       setLoading(false);
     }
@@ -108,7 +120,6 @@ export default function ManageCoursesPage() {
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Add Course Form */}
           <section className="bg-white rounded-2xl shadow p-7">
             <h1 className="text-3xl font-bold text-green-700">
               Add Course
@@ -157,7 +168,7 @@ export default function ManageCoursesPage() {
                 <select
                   value={level}
                   onChange={(event) => setLevel(event.target.value)}
-                  className="w-full border rounded-xl p-3"
+                  className="w-full border rounded-xl p-3 bg-white"
                 >
                   <option value="100 LEVEL">100 LEVEL</option>
                   <option value="200 LEVEL">200 LEVEL</option>
@@ -174,7 +185,7 @@ export default function ManageCoursesPage() {
                 <select
                   value={semester}
                   onChange={(event) => setSemester(event.target.value)}
-                  className="w-full border rounded-xl p-3"
+                  className="w-full border rounded-xl p-3 bg-white"
                 >
                   <option value="First Semester">
                     First Semester
@@ -193,7 +204,9 @@ export default function ManageCoursesPage() {
 
                 <textarea
                   value={description}
-                  onChange={(event) => setDescription(event.target.value)}
+                  onChange={(event) =>
+                    setDescription(event.target.value)
+                  }
                   placeholder="Brief course description"
                   rows={5}
                   className="w-full border rounded-xl p-3"
@@ -204,9 +217,7 @@ export default function ManageCoursesPage() {
               {message && (
                 <p
                   className={`text-sm text-center font-medium ${
-                    message === "Course added successfully."
-                      ? "text-green-700"
-                      : "text-red-600"
+                    success ? "text-green-700" : "text-red-600"
                   }`}
                 >
                   {message}
@@ -223,7 +234,6 @@ export default function ManageCoursesPage() {
             </form>
           </section>
 
-          {/* Existing Courses */}
           <section className="bg-white rounded-2xl shadow p-7">
             <h2 className="text-2xl font-bold">
               Existing Courses
