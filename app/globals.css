@@ -245,3 +245,100 @@ textarea {
     font-size: 1.5rem;
   }
 }
+
+.rich-text-editor {
+  min-height: 320px;
+}
+
+.rich-text-editor:empty::before {
+  color: #6b7280;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.rich-text-editor p {
+  margin: 0.75rem 0;
+  color: #1f2937;
+}
+
+.rich-text-editor h2 {
+  margin: 1.5rem 0 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+.rich-text-editor h3 {
+  margin: 1.25rem 0 0.6rem;
+  font-size: 1.25rem;
+  font-weight: 750;
+  color: #111827;
+}
+
+.rich-text-editor ul {
+  margin: 0.75rem 0;
+  padding-left: 1.75rem;
+  list-style: disc;
+}
+
+.rich-text-editor ol {
+  margin: 0.75rem 0;
+  padding-left: 1.75rem;
+  list-style: decimal;
+}
+
+.rich-text-editor blockquote {
+  margin: 1rem 0;
+  border-left: 4px solid #15803d;
+  background: #f0fdf4;
+  padding: 0.75rem 1rem;
+  color: #374151;
+}
+
+.rich-text-editor table {
+  width: 100%;
+  margin: 1rem 0;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.rich-text-editor th,
+.rich-text-editor td {
+  position: relative;
+  min-width: 100px;
+  border: 1px solid #9ca3af;
+  padding: 0.7rem;
+  vertical-align: top;
+  color: #111827;
+}
+
+.rich-text-editor th {
+  background: #dcfce7;
+  font-weight: 750;
+  text-align: left;
+}
+
+.rich-text-editor .selectedCell::after {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  content: "";
+  pointer-events: none;
+  background: rgba(22, 101, 52, 0.14);
+}
+
+.rich-text-editor .column-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  bottom: -2px;
+  width: 4px;
+  background: #166534;
+  pointer-events: none;
+}
+
+.resize-cursor {
+  cursor: col-resize;
+}
