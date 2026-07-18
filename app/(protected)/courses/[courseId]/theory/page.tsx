@@ -197,9 +197,12 @@ export default function TheoryQuestionsPage() {
                 Answer Guide
               </h2>
 
-              <p className="mt-2 text-gray-700">
-                {current.answerGuide}
-              </p>
+              <div
+  className="rich-text-content mt-3 overflow-x-auto text-gray-700"
+  dangerouslySetInnerHTML={{
+    __html: current.answerGuide,
+  }}
+/>
             </div>
           )}
 

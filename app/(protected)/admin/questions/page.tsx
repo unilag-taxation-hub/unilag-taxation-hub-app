@@ -9,6 +9,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
+import RichTextEditor from "@/components/editor/RichTextEditor";
 
 const ADMIN_EMAIL = "problematitzbest@gmail.com";
 
@@ -319,16 +320,11 @@ export default function AddQuestionsPage() {
                   Answer Guide
                 </label>
 
-                <textarea
-                  value={answerGuide}
-                  onChange={(event) =>
-                    setAnswerGuide(event.target.value)
-                  }
-                  placeholder="Enter the major points expected in the answer..."
-                  rows={8}
-                  className="w-full border rounded-xl p-3"
-                  required
-                />
+               <RichTextEditor
+  value={answerGuide}
+  onChange={setAnswerGuide}
+  placeholder="Write the complete answer guide..."
+/>
               </div>
             )}
 
