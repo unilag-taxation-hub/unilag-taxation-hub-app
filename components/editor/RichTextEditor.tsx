@@ -83,17 +83,21 @@ export default function RichTextEditor({
     );
   }
 
-  function insertTable() {
-    editor
-      .chain()
-      .focus()
-      .insertTable({
-        rows: 3,
-        cols: 3,
-        withHeaderRow: true,
-      })
-      .run();
+ function insertTable() {
+  if (!editor) {
+    return;
   }
+
+  editor
+    .chain()
+    .focus()
+    .insertTable({
+      rows: 3,
+      cols: 3,
+      withHeaderRow: true,
+    })
+    .run();
+}
 
   return (
     <div className="overflow-hidden rounded-xl border border-gray-300 bg-white">
