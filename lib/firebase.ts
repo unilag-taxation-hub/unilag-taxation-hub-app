@@ -1,9 +1,5 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import {
-  getAuth,
-  setPersistence,
-  browserLocalPersistence,
-} from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -15,15 +11,7 @@ const firebaseConfig = {
   appId: "1:555125020334:web:a6902a95bafa3c9643bf3f",
 };
 
-const app = !getApps().length
-  ? initializeApp(firebaseConfig)
-  : getApp();
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
-
-// Persist login across refreshes and Safari sessions
-setPersistence(auth, browserLocalPersistence).catch((error) => {
-  console.error("Persistence error:", error);
-});
-
 export const db = getFirestore(app);

@@ -3,11 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  signInWithEmailAndPassword,
-  setPersistence,
-  browserLocalPersistence,
-} from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
 export default function LoginPage() {
@@ -32,13 +28,11 @@ export default function LoginPage() {
     try {
       setLoading(true);
 
-      await setPersistence(auth, browserLocalPersistence);
-
-await signInWithEmailAndPassword(
-  auth,
-  email.trim(),
-  password
-);
+      await signInWithEmailAndPassword(
+        auth,
+        email.trim(),
+        password
+      );
 
       const searchParams = new URLSearchParams(
         window.location.search
