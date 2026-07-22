@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,6 +16,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    "https://unilag-taxation-hub-app.vercel.app"
+  ),
+
   title: {
     default: "UNILAG Taxation Hub",
     template: "%s | UNILAG Taxation Hub",
@@ -25,10 +30,39 @@ export const metadata: Metadata = {
 
   applicationName: "UNILAG Taxation Hub",
 
+  manifest: "/manifest.webmanifest",
+
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "UNILAG Taxation Hub",
+  },
+
+  formatDetection: {
+    telephone: false,
+  },
+
   icons: {
-    icon: "/logo.png",
-    shortcut: "/logo.png",
-    apple: "/logo.png",
+    icon: [
+      {
+        url: "/icon-192x192.png",
+        sizes: "192x192",
+        type: "image/png",
+      },
+      {
+        url: "/icon-512x512.png",
+        sizes: "512x512",
+        type: "image/png",
+      },
+    ],
+
+    apple: [
+      {
+        url: "/icon-192x192.png",
+      },
+    ],
+
+    shortcut: ["/icon-192x192.png"],
   },
 };
 
@@ -48,6 +82,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable}`}
     >
       <body className="min-h-screen bg-background text-foreground font-sans antialiased">
+        <ServiceWorkerRegister />
         {children}
       </body>
     </html>
